@@ -10,7 +10,7 @@ use avr_device::{
     atmega32u4::{Peripherals, PLL, TC1},
 };
 use avr_device_macros::{entry, interrupt};
-use krust::{delay::delay_ms, keyboard_config, layers, matrix, pins, usb_keyboard, UsbBus};
+use krust::{boards::current_board, delay::delay_ms, layers, matrix, pins, usb_keyboard, UsbBus};
 use usb_device::{
     class_prelude::UsbBusAllocator,
     descriptor::lang_id::LangID,
@@ -22,7 +22,7 @@ use usbd_hid::{
     hid_class::HIDClass,
 };
 
-use keyboard_config::{MATRIX_COLS, MATRIX_ROWS};
+use current_board::config::{MATRIX_COLS, MATRIX_ROWS};
 use layers::Layers;
 use matrix::Matrix;
 use usb_keyboard::UsbKeyboard;
@@ -63,13 +63,19 @@ fn main() -> ! {
 
     let hid_class = HIDClass::new(usb_bus, KeyboardReport::desc(), 1);
     let strings = StringDescriptors::new(LangID::EN)
-        .manufacturer("Custom Keyboard")
-        .product("DZ60");
+        .manufacturer(current_board::config::MANUFACTURER)
+        .product(current_board::config::PRODUCT);
 
-    let usb_device = UsbDeviceBuilder::new(usb_bus, UsbVidPid(0x445A, 0x2260))
-        .strings(&[strings])
-        .unwrap()
-        .build();
+    let usb_device = UsbDeviceBuilder::new(
+        usb_bus,
+        UsbVidPid(
+            current_board::config::VENDOR_ID,
+            current_board::config::PRODUCT_ID,
+        ),
+    )
+    .strings(&[strings])
+    .unwrap()
+    .build();
 
     let matrix = Matrix::new(pins);
     let layers = Layers::new();

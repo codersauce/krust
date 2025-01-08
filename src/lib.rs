@@ -8,7 +8,6 @@
 
 pub mod boards;
 pub mod delay;
-pub mod keyboard_config;
 pub mod keycodes;
 pub mod layers;
 pub mod matrix;
