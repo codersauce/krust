@@ -6,6 +6,8 @@
 #![feature(abi_avr_interrupt)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
+pub mod boards;
+pub mod delay;
 pub mod keyboard_config;
 pub mod keycodes;
 pub mod layers;
@@ -14,7 +16,6 @@ pub mod port;
 pub mod std_stub;
 pub mod usb_descriptors;
 pub mod usb_keyboard;
-pub mod delay;
 
 use core::{arch::asm, cell::Cell, cmp::max};
 
