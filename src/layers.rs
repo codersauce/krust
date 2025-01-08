@@ -1,7 +1,5 @@
-use crate::keyboard_config::{MATRIX_COLS, MATRIX_ROWS};
+use crate::boards::current_board::config::{MATRIX_COLS, MATRIX_ROWS, NUM_LAYERS};
 use crate::keycodes::Keycode;
-
-pub const NUM_LAYERS: usize = 2;
 
 pub struct Layers {
     keymaps: [[[Keycode; MATRIX_COLS]; MATRIX_ROWS]; NUM_LAYERS],

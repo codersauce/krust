@@ -9,8 +9,12 @@ avr-device = { version = "0.7", features = ["atmega32u4"] }
 avr-device-macros = "0.7.0"
 avr-hal-generic = { path = "./avr-hal-generic" }
 embedded-hal = "0.2.7"
+paste = "1.0.15"
 usb-device = "0.3"
 usbd-hid = "0.7"
+
+[features]
+dz60 = []
 
 [profile.dev]
 opt-level = "s"

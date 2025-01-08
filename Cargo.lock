@@ -165,6 +165,7 @@ dependencies = [
  "avr-device-macros",
  "avr-hal-generic",
  "embedded-hal 0.2.7",
+ "paste",
  "usb-device",
  "usbd-hid",
 ]
