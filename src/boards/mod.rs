@@ -19,7 +19,6 @@ define_board! {
     keymap: [
         // Layer 0 - Base QWERTY layer
         [
-            // Row 0
             [ Escape, N1, N2, N3, N4, N5, N6, N7, N8, N9, N0, Minus, Equal, Backspace, Backspace ],
             [ Tab, No,    Q, W, E, R, T, Y, U, I, O, P,     LeftBracket, RightBracket, Backslash ],
             [ CapsLock, No, A, S, D, F, G, H, J, K, L,        Semicolon, Apostrofe, Enter, Enter ],

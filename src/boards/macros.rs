@@ -48,7 +48,6 @@ macro_rules! define_board {
                 }
 
                 pub mod keymap {
-                    use $crate::keycodes::Keycode;
                     use super::config::{MATRIX_COLS, MATRIX_ROWS, NUM_LAYERS};
                     use $crate::keycodes::Keycode::*;
 
