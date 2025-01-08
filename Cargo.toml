@@ -1,0 +1,22 @@
+[package]
+name = "krust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+atmega-hal = { path = "./atmega-hal", features = ["atmega32u4", "rt"] }
+avr-device = { version = "0.7", features = ["atmega32u4"] }
+avr-device-macros = "0.7.0"
+avr-hal-generic = { path = "./avr-hal-generic" }
+embedded-hal = "0.2.7"
+usb-device = "0.3"
+usbd-hid = "0.7"
+
+[profile.dev]
+opt-level = "s"
+lto = true
+
+[profile.release]
+opt-level = "s"
+lto = true
+
