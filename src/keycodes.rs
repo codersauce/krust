@@ -173,6 +173,9 @@ pub enum Keycode {
     RShift,
     RAlt,
     RGui, // 0xE7
+
+    // Custom firmware actions
+    Fn1 = 0xF0,
 }
 
 impl Keycode {
@@ -188,6 +191,17 @@ impl Keycode {
                 | Keycode::RAlt
                 | Keycode::RGui
         )
+    }
+
+    pub fn is_reportable(&self) -> bool {
+        !matches!(*self, Keycode::No | Keycode::Fn1)
+    }
+
+    pub fn layer_target(&self) -> Option<usize> {
+        match *self {
+            Keycode::Fn1 => Some(1),
+            _ => None,
+        }
     }
 
     pub fn to_modifier_bitfield(&self) -> u8 {

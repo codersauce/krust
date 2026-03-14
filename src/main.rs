@@ -136,18 +136,21 @@ fn TIMER1_COMPA() {
         if let Some(usb_keyboard) = &mut USB_CTX {
             if let Some(matrix) = &mut MATRIX_CTX {
                 if let Some(layers) = &mut LAYERS_CTX {
-                    let new_state = matrix.scan();
-                    let layer = layers.get_current_layer();
-                    for row in 0..MATRIX_ROWS {
-                        for col in 0..MATRIX_COLS {
-                            if new_state[row][col] != matrix.last_state[row][col] {
-                                let keycode = layers.get_keycode(layer, row, col);
-                                let is_pressed = new_state[row][col];
-                                usb_keyboard.handle_keypress(keycode, is_pressed);
+                    let previous_state = matrix.state();
+                    if let Some(new_state) = matrix.scan() {
+                        for row in 0..MATRIX_ROWS {
+                            for col in 0..MATRIX_COLS {
+                                if new_state[row][col] != previous_state[row][col] {
+                                    let is_pressed = new_state[row][col];
+                                    let keycode = layers.keycode_for_event(row, col, is_pressed);
+
+                                    if !layers.handle_layer_key(keycode, is_pressed) {
+                                        usb_keyboard.handle_keypress(keycode, is_pressed);
+                                    }
+                                }
                             }
                         }
                     }
-                    matrix.last_state = new_state;
                 }
             }
         }

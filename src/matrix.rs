@@ -10,8 +10,11 @@ use crate::boards::current_board::{
 };
 use crate::port::Pins;
 
+const DEBOUNCE_SCANS: u8 = 5;
+
 pub struct Matrix {
-    pub last_state: [[bool; MATRIX_COLS]; MATRIX_ROWS],
+    state: [[bool; MATRIX_COLS]; MATRIX_ROWS],
+    debounce_counters: [[u8; MATRIX_COLS]; MATRIX_ROWS],
     rows: [Pin<Output, Dynamic>; MATRIX_ROWS],
     cols: [Pin<Input<PullUp>, Dynamic>; MATRIX_COLS],
 }
@@ -19,15 +22,54 @@ pub struct Matrix {
 impl Matrix {
     pub fn new(pins: Pins) -> Self {
         let (rows, cols) = current_board::matrix_pins(pins);
-        Matrix {
-            last_state: [[false; MATRIX_COLS]; MATRIX_ROWS],
+        let mut matrix = Matrix {
+            state: [[false; MATRIX_COLS]; MATRIX_ROWS],
+            debounce_counters: [[0; MATRIX_COLS]; MATRIX_ROWS],
             rows,
             cols,
+        };
+
+        matrix.set_all_rows_high();
+        matrix
+    }
+
+    pub fn state(&self) -> [[bool; MATRIX_COLS]; MATRIX_ROWS] {
+        self.state
+    }
+
+    pub fn scan(&mut self) -> Option<[[bool; MATRIX_COLS]; MATRIX_ROWS]> {
+        let raw_state = self.scan_raw();
+        let mut changed = false;
+
+        for row in 0..MATRIX_ROWS {
+            for col in 0..MATRIX_COLS {
+                if raw_state[row][col] == self.state[row][col] {
+                    self.debounce_counters[row][col] = 0;
+                    continue;
+                }
+
+                let counter = &mut self.debounce_counters[row][col];
+                *counter = counter.saturating_add(1);
+
+                if *counter >= DEBOUNCE_SCANS {
+                    self.state[row][col] = raw_state[row][col];
+                    self.debounce_counters[row][col] = 0;
+                    changed = true;
+                }
+            }
+        }
+
+        if changed {
+            Some(self.state)
+        } else {
+            None
         }
     }
 
-    pub fn scan(&mut self) -> [[bool; MATRIX_COLS]; MATRIX_ROWS] {
+    fn scan_raw(&mut self) -> [[bool; MATRIX_COLS]; MATRIX_ROWS] {
         let mut new_state = [[false; MATRIX_COLS]; MATRIX_ROWS];
+
+        self.set_all_rows_high();
 
         for (row_idx, row_pin) in self.rows.iter_mut().enumerate() {
             row_pin.set_low();
@@ -40,5 +82,11 @@ impl Matrix {
         }
 
         new_state
+    }
+
+    fn set_all_rows_high(&mut self) {
+        for row in self.rows.iter_mut() {
+            row.set_high();
+        }
     }
 }

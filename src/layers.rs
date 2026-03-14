@@ -4,117 +4,15 @@ use crate::keycodes::Keycode;
 pub struct Layers {
     keymaps: [[[Keycode; MATRIX_COLS]; MATRIX_ROWS]; NUM_LAYERS],
     current_layer: usize,
+    pressed_keycodes: [[Keycode; MATRIX_COLS]; MATRIX_ROWS],
 }
 
 impl Layers {
     pub fn new() -> Self {
-        let keymaps = [
-            // Layer 0 - Base QWERTY layer
-            [
-                // Row 0
-                [
-                    Keycode::Escape,
-                    Keycode::N1,
-                    Keycode::N2,
-                    Keycode::N3,
-                    Keycode::N4,
-                    Keycode::N5,
-                    Keycode::N6,
-                    Keycode::N7,
-                    Keycode::N8,
-                    Keycode::N9,
-                    Keycode::N0,
-                    Keycode::Minus,
-                    Keycode::Equal,
-                    Keycode::Backspace,
-                    Keycode::Backspace,
-                ],
-                // Row 1
-                [
-                    Keycode::Tab,
-                    Keycode::No,
-                    Keycode::Q,
-                    Keycode::W,
-                    Keycode::E,
-                    Keycode::R,
-                    Keycode::T,
-                    Keycode::Y,
-                    Keycode::U,
-                    Keycode::I,
-                    Keycode::O,
-                    Keycode::P,
-                    Keycode::LeftBracket,
-                    Keycode::RightBracket,
-                    Keycode::Backslash,
-                ],
-                // Row 2
-                [
-                    Keycode::CapsLock,
-                    Keycode::No,
-                    Keycode::A,
-                    Keycode::S,
-                    Keycode::D,
-                    Keycode::F,
-                    Keycode::G,
-                    Keycode::H,
-                    Keycode::J,
-                    Keycode::K,
-                    Keycode::L,
-                    Keycode::Semicolon,
-                    Keycode::Apostrofe,
-                    Keycode::Enter,
-                    Keycode::Enter,
-                ],
-                // Row 3
-                [
-                    Keycode::LShift,
-                    Keycode::Z,
-                    Keycode::X,
-                    Keycode::C,
-                    Keycode::V,
-                    Keycode::B,
-                    Keycode::N,
-                    Keycode::M,
-                    Keycode::Comma,
-                    Keycode::Dot,
-                    Keycode::Slash,
-                    Keycode::RShift,
-                    Keycode::Up,
-                    Keycode::No,
-                    Keycode::No,
-                ],
-                // Row 4
-                [
-                    Keycode::LCtrl,
-                    Keycode::LGui,
-                    Keycode::LAlt,
-                    Keycode::Space,
-                    Keycode::Space,
-                    Keycode::Space,
-                    Keycode::Space,
-                    Keycode::RAlt,
-                    Keycode::RGui,
-                    Keycode::Application,
-                    Keycode::RCtrl,
-                    Keycode::Left,
-                    Keycode::Down,
-                    Keycode::Right,
-                    Keycode::No,
-                ],
-            ],
-            // Layer 1 - Function layer
-            [
-                [Keycode::Grave; MATRIX_COLS], // Row 0 - all grave for example
-                [Keycode::No; MATRIX_COLS],    // Row 1
-                [Keycode::No; MATRIX_COLS],    // Row 2
-                [Keycode::No; MATRIX_COLS],    // Row 3
-                [Keycode::No; MATRIX_COLS],    // Row 4
-            ],
-        ];
-
         Layers {
-            keymaps,
+            keymaps: crate::boards::current_board::keymap::KEYMAPS,
             current_layer: 0,
+            pressed_keycodes: [[Keycode::No; MATRIX_COLS]; MATRIX_ROWS],
         }
     }
 
@@ -129,6 +27,32 @@ impl Layers {
     pub fn set_layer(&mut self, layer: usize) {
         if layer < NUM_LAYERS {
             self.current_layer = layer;
+        }
+    }
+
+    pub fn keycode_for_event(&mut self, row: usize, col: usize, pressed: bool) -> Keycode {
+        if pressed {
+            let keycode = self.get_keycode(self.current_layer, row, col);
+            self.pressed_keycodes[row][col] = keycode;
+            keycode
+        } else {
+            let keycode = self.pressed_keycodes[row][col];
+            self.pressed_keycodes[row][col] = Keycode::No;
+            keycode
+        }
+    }
+
+    pub fn handle_layer_key(&mut self, keycode: Keycode, pressed: bool) -> bool {
+        match keycode.layer_target() {
+            Some(layer) => {
+                if pressed {
+                    self.set_layer(layer);
+                } else {
+                    self.set_layer(0);
+                }
+                true
+            }
+            None => false,
         }
     }
 }
